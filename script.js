@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
     const boardWidth = 10;
     const boardHeight = 20;
     const blockSize = 20;
@@ -9,7 +9,7 @@ $(document).ready(function() {
     let score = 0;
     let highestScore = localStorage.getItem('highestScore') || 0;
     let gameInterval;
-    $('#play').click(function() {
+    $('#play').click(function () {
         var audio = document.getElementById('hit-sound');
         if (audio.paused) {
             audio.play();
@@ -68,6 +68,64 @@ $(document).ready(function() {
             });
         });
     }
+    // ..........................................................
+    // 
+    // 
+    // 
+    function handleTouchStart(evt) {
+        const firstTouch = evt.touches[0];
+        xDown = firstTouch.clientX;
+        yDown = firstTouch.clientY;
+    }
+
+    function handleTouchMove(evt) {
+        if (!xDown || !yDown) {
+            return;
+        }
+
+        let xUp = evt.touches[0].clientX;
+        let yUp = evt.touches[0].clientY;
+
+        let xDiff = xDown - xUp;
+        let yDiff = yDown - yUp;
+
+        if (Math.abs(xDiff) > Math.abs(yDiff)) {
+            if (xDiff > 0) {
+                moveBlock(-1, 0); // Left swipe
+            } else {
+                moveBlock(1, 0); // Right swipe
+            }
+        } else {
+            if (yDiff > 0) {
+                rotateBlock(); // Up swipe
+            } else {
+                moveBlock(0, 1); // Down swipe
+            }
+        }
+
+        xDown = null;
+        yDown = null;
+    }
+
+    function handleTouchEnd(evt) {
+        if (!xDown || !yDown) {
+            return;
+        }
+
+        let xUp = evt.changedTouches[0].clientX;
+        let yUp = evt.changedTouches[0].clientY;
+
+        if (Math.abs(xDown - xUp) < 10 && Math.abs(yDown - yUp) < 10) {
+            rotateBlock(); // Single tap
+        }
+
+        xDown = null;
+        yDown = null;
+    }
+    // 
+    // .........................................................
+    // 
+    // 
 
     function isValidMove(offsetX, offsetY, newShape = currentBlock.shape) {
         for (let y = 0; y < newShape.length; y++) {
@@ -163,7 +221,7 @@ $(document).ready(function() {
         sound.play();
     }
 
-    $(document).keydown(function(e) {
+    $(document).keydown(function (e) {
         if (e.key === 'ArrowLeft') moveBlock(-1, 0);
         if (e.key === 'ArrowRight') moveBlock(1, 0);
         if (e.key === 'ArrowDown') moveBlock(0, 1);
@@ -173,9 +231,15 @@ $(document).ready(function() {
     function startGame() {
         score = 0;
         $('#current-score').text(score);
+
         board = Array.from({ length: boardHeight }, () => Array(boardWidth).fill(0));
         spawnBlock();
         gameInterval = setInterval(() => moveBlock(0, 1), 500);
+        let xDown = null;
+        document.addEventListener('touchstart', handleTouchStart, false);
+        document.addEventListener('touchmove', handleTouchMove, false);
+        document.addEventListener('touchend', handleTouchEnd, false);
+
     }
 
     startGame();
