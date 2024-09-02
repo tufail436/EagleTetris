@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    const boardWidth = 10;
+    const boardWidth = 12;
     const boardHeight = 20;
     const blockSize = 20;
     let board = Array.from({ length: boardHeight }, () => Array(boardWidth).fill(0));
